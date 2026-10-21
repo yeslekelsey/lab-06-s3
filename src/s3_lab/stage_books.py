@@ -159,8 +159,6 @@ def main():
     if not create_bucket(bucket) or not make_public(bucket):
         log.error(f"Could not create or publish bucket {bucket}")
         sys.exit(1)
-
-    if not 
     
     count = upload_files(bucket, file_paths)
     if upload_index(bucket, index_path) and count == len(file_paths):
