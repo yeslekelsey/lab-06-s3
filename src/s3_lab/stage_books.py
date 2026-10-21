@@ -29,7 +29,7 @@ def parse_args():
     return args.list_file, args.index_path, args.bucket
 
 def download_books(list_file, dest_dir):
-    """Downloads a list of books and saves in in a directory."""
+    """Downloads a list of books and saves in a directory."""
     os.makedirs(dest_dir, exist_ok=True)
     paths = []
     with open(list_file) as f:
@@ -50,19 +50,19 @@ def download_books(list_file, dest_dir):
         except requests.RequestException as e:
             log.error(f"Error downloading {url}: {e}")
         time.sleep(1)
-        return paths
+    return paths
     
     
 
 def create_bucket(bucket):
     """Creates a bucket. Returns True if the bucket exists afterwards and False otherwise."""
-    log.info(f"{bucket}")
+    log.info(f"Checking bucket {bucket}")
     #check if bucket exists first:
     try:
         s3.head_bucket(Bucket=bucket)
         log.info(f"Bucket {bucket} already exists")
         return True
-    except:
+    except ClientError:
         pass # create it below
     try:
         s3.create_bucket(Bucket=bucket)
@@ -129,7 +129,7 @@ def upload_files(bucket, file_paths):
     return uploaded
 
 def upload_index(bucket, index_path):
-    """Loop over the files in a path and upload to a bucket"""
+    """Upload index.html to the bucket. Returns True on success, False otherwise."""
     try:
         with open(index_path, "rb") as f:
             s3.put_object(
@@ -138,7 +138,7 @@ def upload_index(bucket, index_path):
                 Body=f,
                 ContentType="text/html",  # so browsers can display as a web page
             )
-        log.info(f"Uploaded {index_path} to s3://{bucket}/{"index.html"}")
+        log.info(f"Uploaded {index_path} to s3://{bucket}/index.html")
         return True
     except FileNotFoundError:
         log.error(f"Local file not found: {index_path}")
@@ -148,7 +148,7 @@ def upload_index(bucket, index_path):
         return False
 
 def main():
-    """Download books, creat/publish bucket, and upload everything"""
+    """Download books, create/publish bucket, and upload everything"""
     list_file, index_path, bucket = parse_args()
     file_paths = download_books(list_file, "books")
     
